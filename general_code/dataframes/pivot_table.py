@@ -6,7 +6,7 @@ from sqlalchemy import desc
 from tabulate import tabulate
 
 # CONFIG FILES
-base_path = Path(__file__).resolve().parent
+base_path = Path(__file__).resolve().parent.parent
 gcp_json = os.path.join(base_path, 'config/gcp.json')
 gcp_file = json.load(open(gcp_json))
 
@@ -16,13 +16,14 @@ BQ_client = bigquery.Client.from_service_account_json(gcp_json)
 # QUERY
 SQL_table = """
     SELECT *
-    FROM `big-query-project.big_query_dataset.big_query_table`
+    FROM `peya-data-dev-tools-pro.external_process.mc_donalds_testing`
     WHERE Country IN ('Argentina','Chile')
 """
 
 # DATAFRAME
 table_dataframe_raw = BQ_client.query(SQL_table).to_dataframe()
-table_dataframe_raw.to_csv('./general_code/temporal_folder/original_csv.csv')
+table_dataframe_raw.to_csv(
+    './general_code/dataframes/temporal_folder/original_csv.csv')
 
 cols_order = table_dataframe_raw['Measure_Names'].unique().tolist()
 

@@ -1,0 +1,8 @@
+config/gcp.json
+config/gcp_pro.json
+config/aws_s3.json
+gcp.json
+gcp_pro.json
+aws_s3.json
+.pdf
+tableau.json

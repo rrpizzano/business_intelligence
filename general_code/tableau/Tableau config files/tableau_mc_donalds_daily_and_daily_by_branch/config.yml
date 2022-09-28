@@ -1,0 +1,43 @@
+name: TABLEAU_dag_name
+
+dagConfig:
+  schedule_interval: '"30 12 * * *"'
+
+defaultArgs:
+  start_date: datetime(2022, 5, 23)
+  retry_delay: timedelta(seconds=600)
+  retries: 18
+  notificationChannelSuccess: slack_channel_success
+  notificationChannelError: slack_channel_error
+  owner: da_food
+
+preconditions:
+  - type: dq-api-ws
+    name: table_1_loaded
+    table_uri: "{{params.datasets.dataset}}.table_1"
+  - type: dq-api-ws
+    name: table_2_loaded
+    table_uri: "{{params.datasets.dataset}}.table_2"
+  - type: dq-api-ws
+    name: table_3_loaded
+    table_uri: "{{params.datasets.dataset}}.table_3"
+  - type: dq-api-ws
+    name: table_4_loaded
+    table_uri: "{{params.datasets.dataset}}.table_4"
+  - type: dq-api-ws
+    name: table_5_loaded
+    table_uri: "{{params.datasets.dataset}}.table_5"
+  - type: dq-api-ws
+    name: table_6_loaded
+    table_uri: "{{params.datasets.dataset}}.table_6"
+
+stages:
+  - name: refresh_extract
+    steps:
+      - type: refresh_tableau
+        name: refresh_tableau_dashboard_name
+        checkStatus: true
+        target:
+          type: workbook
+          name: Tableau Dashboard Name (must be unique)
+          project: Data

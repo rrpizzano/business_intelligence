@@ -1,0 +1,22 @@
+{
+    "dagId": "tableau_send_id_1234",
+    "scheduleInterval": "30 12 * * *",
+    "workbookName": "Tableau Dashboard name (must be unique)",
+    "viewNames": [
+        {
+            "view_name": "Dashboard view name 1",
+            "view_format": "PDF_and_CSV"
+        },
+        {
+            "view_name": "Dashboard view name 2",
+            "view_format": "CSV"
+        }
+    ],
+    "bucketName": "us-bucket-name-in-gcp",
+    "bucketFolder": "folder/sub_folder/sub_sub_folder",
+    "emails": [
+        "rodrigo.pizzano@outlook.com",
+        "rrpizzano@gmail.com"
+    ],
+    "emailSubject": "[Attached data] Title of the Dashboard | Some other info"
+}

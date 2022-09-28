@@ -1,0 +1,9 @@
+{
+    "dagId": "braze_daily_data",
+    "scheduleInterval": "15 17 * * *",
+    "apiCredentialsInAirflow": "braze_api_credentials",
+    "project": "big-query-project",
+    "dataset": "big_query_dataset",
+    "table": "big_query_table",
+    "splits": 10
+}

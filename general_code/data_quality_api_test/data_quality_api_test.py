@@ -41,3 +41,9 @@ get_table_etl_status(
     dataset='user_maria_ugarte',
     table='Mkt_Comms_VP'
 )
+
+get_table_etl_status(
+    project='peya-data-origins-pro',
+    dataset='cl_billing_2',
+    table='gsheet_contracts_with_proactive_policy_sap'
+)

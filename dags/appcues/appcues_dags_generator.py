@@ -4,7 +4,7 @@ import os
 import json
 
 
-def create_dag(dag_id, schedule_interval, api_credentials_in_airflow, project, dataset, table, splits):
+def create_dag(dag_id, schedule_interval, project, dataset, table, splits):
     """
     Creates a DAG for the given attributes
     The attributes are loaded in a json file in the same folder as this script
@@ -15,8 +15,6 @@ def create_dag(dag_id, schedule_interval, api_credentials_in_airflow, project, d
         Name of the Airflow dag
     schedule_interval: Cron schedule expressions (Ex. 30 12 * * *)
         Schedule interval for the dag execution
-    api_credentials_in_airflow : string
-        Indicates de name of the Airflow variable that has the credentials for the API
     project : string
         BigQuery datasource project name
     dataset : string
@@ -25,13 +23,11 @@ def create_dag(dag_id, schedule_interval, api_credentials_in_airflow, project, d
         BigQuery datasource table name
     splits : integer
         Indicates the total of splits of the table, more splits less time running
-    split_selected: integer
-        Indicates the split part that we want to select to send the data  
     """
     import importlib
 
-    braze_module = importlib.import_module(
-        "dags.utils.braze_module")
+    appcues_module = importlib.import_module(
+        "dags.utils.appcues_module")
     slack_module = importlib.import_module(
         "dags.utils.slack_module")
     sensor_module = importlib.import_module(
@@ -66,18 +62,17 @@ def create_dag(dag_id, schedule_interval, api_credentials_in_airflow, project, d
             table=table
         )
 
-        braze_send_tasks = []
+        appcues_send_tasks = []
         for i in range(splits):
-            braze_task = braze_module.send_table_data_to_braze_operator(
+            appcues_task = appcues_module.send_table_data_to_appcues_operator(
                 task_id=f'split_{i}',
-                api_credentials_in_airflow=api_credentials_in_airflow,
                 project=project,
                 dataset=dataset,
                 table=table,
                 splits=splits,
                 split_selected=i
             )
-            braze_send_tasks.append(braze_task)
+            appcues_send_tasks.append(appcues_task)
 
         end = sensor_module.dummy('end')
 
@@ -85,21 +80,22 @@ def create_dag(dag_id, schedule_interval, api_credentials_in_airflow, project, d
 
         slack_fail = slack_module.slack_fail(dag=dag)
 
-        # Orden de operadores
-        start >> table_sensor >> braze_send_tasks >> end >> [
-            slack_ok, slack_fail]
+        # Orden de operadores (en serie)
+        start >> table_sensor >> appcues_send_tasks[0]
+        for i in range(splits-1):
+            appcues_send_tasks[i] >> appcues_send_tasks[i+1]
+        appcues_send_tasks[-1] >> end >> [slack_ok, slack_fail]
 
     return dag
 
 
-for file in os.listdir("/dags/braze"):
+for file in os.listdir("/dags/appcues"):
     if os.path.splitext(file)[1] == '.json':
-        with open(f"/dags/braze/{file}", 'r') as f:
+        with open(f"/dags/appcues/{file}", 'r') as f:
             file_json = json.loads(f.read())
 
             dag_id = file_json['dagId']
             schedule_interval = file_json['scheduleInterval']
-            api_credentials_in_airflow = file_json['apiCredentialsInAirflow']
             project = file_json['project']
             dataset = file_json['dataset']
             table = file_json['table']
@@ -108,7 +104,6 @@ for file in os.listdir("/dags/braze"):
         globals()[dag_id] = create_dag(
             dag_id,
             schedule_interval,
-            api_credentials_in_airflow,
             project,
             dataset,
             table,

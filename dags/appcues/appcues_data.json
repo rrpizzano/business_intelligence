@@ -1,0 +1,8 @@
+{
+    "dagId": "appcues_data",
+    "scheduleInterval": "30 15 * * *",
+    "project": "big-query-project",
+    "dataset": "big_query_dataset",
+    "table": "big_query_table",
+    "splits": 10
+}
